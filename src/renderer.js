@@ -23,10 +23,40 @@ let currentTool = 'select';
 
 async function handleCaptureError(errorMsg) {
   console.error('[Ninja Shot] Capture error:', errorMsg);
-  const isScrotMissingError = errorMsg && (errorMsg.includes('Scrot is required on Linux') || errorMsg.includes('Install it:'));
-  if (isScrotMissingError && window.ninjaShot.installScrot) {
+  const isGnomeScreenshotError = errorMsg && (errorMsg.includes('gnome-screenshot') || errorMsg.includes('GNOME'));
+  const isGrimMissingError = errorMsg && errorMsg.includes('Grim is required');
+  const isScrotMissingError = errorMsg && errorMsg.includes('Scrot is required on Linux');
+  if (isGnomeScreenshotError && window.ninjaShot.installGnomeScreenshot) {
     const install = confirm(
-      'Scrot is required for screen capture on Linux. Install it now?\n\n' +
+      'gnome-screenshot is needed for screen capture on GNOME Wayland. Install it now?\n\nYou may be asked for your password.'
+    );
+    if (install) {
+      const result = await window.ninjaShot.installGnomeScreenshot();
+      if (result && result.ok) {
+        alert('gnome-screenshot was installed. Try capturing again.');
+      } else {
+        alert((result && result.error) || 'Try: sudo apt-get install gnome-screenshot');
+      }
+    }
+  } else if (isGrimMissingError && window.ninjaShot.installGrim) {
+    const install = confirm(
+      'Grim is required for screen capture on Wayland. Install it now?\n\n' +
+      'You may be asked for your password. Click OK to start installation.'
+    );
+    if (install) {
+      const result = await window.ninjaShot.installGrim();
+      if (result && result.ok) {
+        console.log('[Ninja Shot] Grim installed successfully');
+        alert('Grim was installed. Try capturing again.');
+      } else {
+        const err = (result && result.error) || 'Try in a terminal: sudo apt-get install grim';
+        console.error('[Ninja Shot] Install failed:', err);
+        alert(err);
+      }
+    }
+  } else if (isScrotMissingError && window.ninjaShot.installScrot) {
+    const install = confirm(
+      'Scrot is required for screen capture on Linux (X11). Install it now?\n\n' +
       'You may be asked for your password. Click OK to start installation.'
     );
     if (install) {

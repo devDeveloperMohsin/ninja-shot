@@ -4,10 +4,13 @@ Screenshot app built with Electron: full-screen or region capture, annotations (
 
 ## Requirements
 
-- **Linux:** Screen capture uses **scrot** (no ImageMagick, no share picker). Install with:
+- **Linux (X11):** Screen capture uses **scrot**. Install with:
   ```bash
   sudo apt-get install scrot
   ```
+- **Linux (Wayland):**
+  - **Sway / wlroots:** Uses **grim**. Install: `sudo apt-get install grim`
+  - **GNOME:** Grim fails with "compositor doesn't support wlr-screencopy". The app falls back to **gnome-screenshot** (usually pre-installed). If needed: `sudo apt-get install gnome-screenshot`
 
 ## Usage
 

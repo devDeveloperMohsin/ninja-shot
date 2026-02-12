@@ -271,6 +271,56 @@ ipcMain.handle('install:scrot', () => {
   });
 });
 
+// Linux Wayland: install grim (screenshot tool for Wayland)
+ipcMain.handle('install:grim', () => {
+  if (process.platform !== 'linux') {
+    return Promise.resolve({ ok: false, error: 'Only supported on Linux' });
+  }
+  return new Promise((resolve) => {
+    const tryApt = () => {
+      const child = spawn('pkexec', ['apt-get', 'install', '-y', 'grim'], {
+        stdio: ['ignore', 'pipe', 'pipe'],
+      });
+      child.on('close', (code) => {
+        if (code === 0) return resolve({ ok: true });
+        tryDnf();
+      });
+      child.on('error', () => tryDnf());
+    };
+    const tryDnf = () => {
+      const child = spawn('pkexec', ['dnf', 'install', '-y', 'grim'], {
+        stdio: ['ignore', 'pipe', 'pipe'],
+      });
+      child.on('close', (code) => {
+        if (code === 0) return resolve({ ok: true });
+        resolve({ ok: false, error: 'Could not install grim. Try: sudo apt-get install grim' });
+      });
+      child.on('error', () => resolve({ ok: false, error: 'Try: sudo apt-get install grim' }));
+    };
+    tryApt();
+  });
+});
+
+// Linux GNOME Wayland: install gnome-screenshot (fallback when grim doesn't work)
+ipcMain.handle('install:gnome-screenshot', () => {
+  if (process.platform !== 'linux') {
+    return Promise.resolve({ ok: false, error: 'Only supported on Linux' });
+  }
+  return new Promise((resolve) => {
+    const tryApt = () => {
+      const child = spawn('pkexec', ['apt-get', 'install', '-y', 'gnome-screenshot'], {
+        stdio: ['ignore', 'pipe', 'pipe'],
+      });
+      child.on('close', (code) => {
+        if (code === 0) return resolve({ ok: true });
+        resolve({ ok: false, error: 'Could not install. Try: sudo apt-get install gnome-screenshot' });
+      });
+      child.on('error', () => resolve({ ok: false, error: 'Try: sudo apt-get install gnome-screenshot' }));
+    };
+    tryApt();
+  });
+});
+
 app.whenReady().then(() => {
   // Apply strict CSP only when packaged (production). In dev, webpack-dev-server uses eval.
   if (app.isPackaged) {
