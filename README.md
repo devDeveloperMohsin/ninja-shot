@@ -16,7 +16,8 @@ Screenshot app built with Electron: full-screen or region capture, annotations (
 - **Full screen** / **Select region**: Capture from the home screen.
 - **Print Screen**: Global shortcut (configurable in Settings: full screen or region).
 - **Editor**: After capture, add text, arrows, highlights, or blur; then **Copy** or **Save**.
-- The app uses a **frameless** window with a custom title bar (drag to move; buttons to minimize, maximize, close). **Quit**: `Ctrl+Q` (Windows/Linux) or `Cmd+Q` (macOS).
+- The app uses a **frameless** window with a custom title bar (drag to move; buttons to minimize, maximize, close). **Quit**: `Ctrl+Q` (Windows/Linux) or `Cmd+Q` (macOS).  
+  On **Linux**, some window managers may still draw their own title bar; if you see a double title bar, you can try disabling client-side/window decorations for Ninja Shot in your desktop’s window settings.
 
 ## Where screenshots are saved
 

@@ -13,6 +13,7 @@ let mainWindow = null;
 let overlayWindow = null;
 
 function createWindow() {
+  const isLinux = process.platform === 'linux';
   mainWindow = new BrowserWindow({
     width: 900,
     height: 700,
@@ -21,6 +22,8 @@ function createWindow() {
     frame: false,
     autoHideMenuBar: true,
     backgroundColor: '#1a1a2e',
+    // On Linux, request no native title bar so the WM may omit its decorations (we have a custom title bar).
+    ...(isLinux ? { titleBarStyle: 'hidden' } : {}),
     webPreferences: {
       preload: MAIN_WINDOW_PRELOAD_WEBPACK_ENTRY,
       contextIsolation: true,
