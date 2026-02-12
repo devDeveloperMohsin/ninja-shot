@@ -15,9 +15,21 @@ const btnCopy = document.getElementById('btn-copy');
 const btnSave = document.getElementById('btn-save');
 const btnNew = document.getElementById('btn-new');
 const toolButtons = document.querySelectorAll('.tool');
+const btnWindowMinimize = document.getElementById('btn-window-minimize');
+const btnWindowMaximize = document.getElementById('btn-window-maximize');
+const btnWindowClose = document.getElementById('btn-window-close');
+const titleBarDrag = document.querySelector('.title-bar-drag');
 
 let currentImageDataUrl = null;
 let currentTool = 'select';
+
+// --- Title bar: window controls ---
+if (btnWindowMinimize) btnWindowMinimize.addEventListener('click', () => window.ninjaShot.windowMinimize());
+if (btnWindowMaximize) btnWindowMaximize.addEventListener('click', () => window.ninjaShot.windowToggleMaximize());
+if (btnWindowClose) btnWindowClose.addEventListener('click', () => window.ninjaShot.windowClose());
+if (titleBarDrag) {
+  titleBarDrag.addEventListener('dblclick', () => window.ninjaShot.windowToggleMaximize());
+}
 
 // --- Home: capture actions ---
 

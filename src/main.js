@@ -18,6 +18,8 @@ function createWindow() {
     height: 700,
     minWidth: 400,
     minHeight: 300,
+    frame: false,
+    backgroundColor: '#1a1a2e',
     webPreferences: {
       preload: MAIN_WINDOW_PRELOAD_WEBPACK_ENTRY,
       contextIsolation: true,
@@ -273,6 +275,18 @@ ipcMain.handle('install:dependency', (_event, packageKey) => {
   });
 });
 
+ipcMain.handle('window:minimize', () => {
+  if (mainWindow && !mainWindow.isDestroyed()) mainWindow.minimize();
+});
+ipcMain.handle('window:close', () => {
+  if (mainWindow && !mainWindow.isDestroyed()) mainWindow.close();
+});
+ipcMain.handle('window:toggleMaximize', () => {
+  if (!mainWindow || mainWindow.isDestroyed()) return;
+  if (mainWindow.isMaximized()) mainWindow.unmaximize();
+  else mainWindow.maximize();
+});
+
 app.whenReady().then(() => {
   // Apply strict CSP only when packaged (production). In dev, webpack-dev-server uses eval.
   if (app.isPackaged) {
@@ -289,33 +303,7 @@ app.whenReady().then(() => {
 
   createWindow();
 
-  // Application menu
-  const template = [
-    {
-      label: 'File',
-      submenu: [
-        { label: 'New screenshot', accelerator: 'CmdOrCtrl+N', click: () => mainWindow && mainWindow.webContents.send('menu:new') },
-        { label: 'Save', accelerator: 'CmdOrCtrl+S', click: () => mainWindow && mainWindow.webContents.send('menu:save') },
-        { label: 'Copy to clipboard', accelerator: 'CmdOrCtrl+Shift+C', click: () => mainWindow && mainWindow.webContents.send('menu:copy') },
-        { type: 'separator' },
-        { role: 'quit' },
-      ],
-    },
-    {
-      label: 'Capture',
-      submenu: [
-        { label: 'Full screen', click: () => mainWindow && mainWindow.webContents.send('menu:captureFull') },
-        { label: 'Select region', click: () => mainWindow && mainWindow.webContents.send('menu:captureRegion') },
-      ],
-    },
-    {
-      label: 'Options',
-      submenu: [
-        { label: 'Settings', click: () => mainWindow && mainWindow.webContents.send('menu:settings') },
-      ],
-    },
-  ];
-  Menu.setApplicationMenu(Menu.buildFromTemplate(template));
+  Menu.setApplicationMenu(null);
 
   // Print Screen global shortcut
   function onPrintScreen() {

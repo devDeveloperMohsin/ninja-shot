@@ -5,29 +5,94 @@
 }
 
 body {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  font-family: 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
   background: #1a1a2e;
-  color: #eee;
-  min-height: 100vh;
+  color: #e8e8e8;
+  height: 100vh;
   overflow: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+#app-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+}
+
+#title-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 38px;
+  min-height: 38px;
+  padding: 0 0.5rem 0 1rem;
+  background: #16162a;
+  border-bottom: 1px solid #2a2a4a;
+  -webkit-app-region: drag;
+  app-region: drag;
+  user-select: none;
+}
+
+.title-bar-drag {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #e0e0e0;
+}
+
+.title-bar-controls {
+  display: flex;
+  -webkit-app-region: no-drag;
+  app-region: no-drag;
+}
+
+.title-bar-controls button {
+  width: 38px;
+  height: 38px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: #aaa;
+  font-size: 1.1rem;
+  line-height: 1;
+  cursor: pointer;
+  transition: color 0.15s, background 0.15s;
+}
+
+.title-bar-controls button:hover {
+  color: #eee;
+  background: rgba(255, 255, 255, 0.06);
+}
+
+#btn-window-close:hover {
+  color: #fff;
+  background: #e94560;
+}
+
+#app-content {
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
 }
 
 .view {
   padding: 1.5rem;
-  min-height: 100vh;
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
 }
 
 .view.hidden {
   display: none !important;
 }
 
-body.editor-active #view-editor.view-active {
-  position: fixed;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  z-index: 100;
+body.editor-active #app-content #view-editor.view-active {
   display: flex !important;
+  flex: 1;
+  min-height: 0;
 }
 
 #view-home {
@@ -39,44 +104,52 @@ body.editor-active #view-editor.view-active {
 }
 
 #view-home h1 {
-  font-size: 1.75rem;
+  font-size: 1.65rem;
   font-weight: 600;
+  letter-spacing: -0.02em;
+  color: #f0f0f0;
 }
 
 #view-home p {
-  color: #aaa;
+  color: #9ca3af;
   margin-bottom: 0.5rem;
+  font-size: 0.95rem;
 }
 
 .actions {
   display: flex;
-  gap: 0.75rem;
+  gap: 0.625rem;
+  flex-wrap: wrap;
+  justify-content: center;
 }
 
 .actions button {
-  padding: 0.6rem 1.2rem;
-  font-size: 1rem;
+  padding: 0.625rem 1.25rem;
+  font-size: 0.9375rem;
+  font-weight: 500;
   border: none;
-  border-radius: 8px;
-  background: #16213e;
-  color: #eee;
+  border-radius: 10px;
+  background: #1e293b;
+  color: #e8e8e8;
   cursor: pointer;
-  transition: background 0.15s;
+  transition: background 0.2s, transform 0.1s;
 }
 
 .actions button:hover {
-  background: #0f3460;
+  background: #334155;
 }
 
 .actions button:active {
   background: #e94560;
+  transform: scale(0.98);
 }
 
 /* Editor */
 #view-editor {
   display: flex;
   flex-direction: column;
-  height: 100vh;
+  flex: 1;
+  min-height: 0;
   overflow: hidden;
 }
 
@@ -86,10 +159,10 @@ body.editor-active #view-editor.view-active {
   justify-content: space-between;
   flex-wrap: nowrap;
   gap: 0.75rem;
-  min-height: 48px;
+  min-height: 44px;
   padding: 0.5rem 0.75rem;
-  background: #16213e;
-  border-bottom: 2px solid #e94560;
+  background: #1e293b;
+  border-bottom: 1px solid #334155;
   flex-shrink: 0;
   position: sticky;
   top: 0;
@@ -97,9 +170,9 @@ body.editor-active #view-editor.view-active {
 }
 
 .editor-title {
-  font-size: 0.95rem;
+  font-size: 0.9rem;
   font-weight: 600;
-  color: #eee;
+  color: #cbd5e1;
   margin-right: auto;
 }
 
@@ -114,18 +187,19 @@ body.editor-active #view-editor.view-active {
 }
 
 .tool {
-  padding: 0.4rem 0.75rem;
-  font-size: 0.875rem;
+  padding: 0.4rem 0.7rem;
+  font-size: 0.8125rem;
+  font-weight: 500;
   border: 1px solid transparent;
-  border-radius: 6px;
+  border-radius: 8px;
   background: transparent;
-  color: #aaa;
+  color: #94a3b8;
   cursor: pointer;
-  transition: all 0.15s;
+  transition: all 0.2s;
 }
 
 .tool:hover {
-  color: #eee;
+  color: #e2e8f0;
   background: rgba(255, 255, 255, 0.06);
 }
 
@@ -143,15 +217,16 @@ body.editor-active #view-editor.view-active {
 }
 
 .editor-actions button {
-  padding: 0.5rem 1rem;
-  min-width: 4rem;
-  font-size: 0.875rem;
+  padding: 0.45rem 0.9rem;
+  min-width: 3.5rem;
+  font-size: 0.8125rem;
+  font-weight: 500;
   border: none;
-  border-radius: 6px;
-  background: #0f3460;
-  color: #eee;
+  border-radius: 8px;
+  background: #334155;
+  color: #e8e8e8;
   cursor: pointer;
-  transition: background 0.15s;
+  transition: background 0.2s;
   white-space: nowrap;
 }
 
@@ -161,15 +236,16 @@ body.editor-active #view-editor.view-active {
 }
 
 #btn-save:hover {
-  background: #ff6b6b;
+  background: #f25c75;
 }
 
 .editor-actions button:hover {
-  background: #e94560;
+  background: #475569;
 }
 
 .editor-area {
   flex: 1;
+  min-height: 0;
   overflow: auto;
   padding: 1rem;
   display: flex;
@@ -204,46 +280,51 @@ body.editor-active #view-editor.view-active {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 1rem;
+  gap: 1.25rem;
 }
 
 #view-settings h1 {
-  font-size: 1.5rem;
+  font-size: 1.4rem;
+  font-weight: 600;
+  color: #f0f0f0;
 }
 
 .settings-form {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
-  min-width: 260px;
+  min-width: 280px;
 }
 
 .settings-form label {
-  color: #aaa;
-  font-size: 0.9rem;
+  color: #94a3b8;
+  font-size: 0.875rem;
+  font-weight: 500;
 }
 
 .settings-form select {
-  padding: 0.5rem;
-  font-size: 1rem;
-  background: #16213e;
-  color: #eee;
-  border: 1px solid #0f3460;
-  border-radius: 6px;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.9375rem;
+  background: #1e293b;
+  color: #e8e8e8;
+  border: 1px solid #334155;
+  border-radius: 8px;
 }
 
 #btn-settings-back {
-  padding: 0.5rem 1rem;
-  font-size: 1rem;
+  padding: 0.5rem 1.25rem;
+  font-size: 0.9375rem;
+  font-weight: 500;
   border: none;
-  border-radius: 8px;
-  background: #16213e;
-  color: #eee;
+  border-radius: 10px;
+  background: #1e293b;
+  color: #e8e8e8;
   cursor: pointer;
+  transition: background 0.2s;
 }
 
 #btn-settings-back:hover {
-  background: #0f3460;
+  background: #334155;
 }
 
 .save-path-label {
@@ -251,8 +332,8 @@ body.editor-active #view-editor.view-active {
 }
 
 .save-path-value {
-  font-size: 0.85rem;
-  color: #888;
+  font-size: 0.8125rem;
+  color: #64748b;
   word-break: break-all;
   margin-top: 0.25rem;
 }

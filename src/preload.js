@@ -20,4 +20,7 @@ contextBridge.exposeInMainWorld('ninjaShot', {
   },
   /** Install a capture dependency (Linux). packageKey: 'scrot' | 'grim' | 'gnome-screenshot' */
   installDependency: (packageKey) => ipcRenderer.invoke('install:dependency', packageKey),
+  windowMinimize: () => ipcRenderer.invoke('window:minimize'),
+  windowClose: () => ipcRenderer.invoke('window:close'),
+  windowToggleMaximize: () => ipcRenderer.invoke('window:toggleMaximize'),
 });
