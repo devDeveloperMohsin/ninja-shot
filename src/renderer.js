@@ -15,6 +15,10 @@ const btnCopy = document.getElementById('btn-copy');
 const btnSave = document.getElementById('btn-save');
 const btnNew = document.getElementById('btn-new');
 const toolButtons = document.querySelectorAll('.tool');
+const inlineTextEditor = document.getElementById('inline-text-editor');
+const textEntryInput = document.getElementById('text-entry-input');
+const textEntryCancel = document.getElementById('text-entry-cancel');
+const textEntryAdd = document.getElementById('text-entry-add');
 const btnWindowMinimize = document.getElementById('btn-window-minimize');
 const btnWindowMaximize = document.getElementById('btn-window-maximize');
 const btnWindowClose = document.getElementById('btn-window-close');
@@ -174,6 +178,8 @@ let annotCtx = null;
 const annotations = [];
 let dragStart = null;
 let currentAnnotation = null;
+let selectedAnnotationIndex = null;
+let selectDragStart = null; // { startX, startY } when start dragging selected annotation
 
 function initAnnotationCanvas() {
   annotCtx = annotCanvas.getContext('2d');
@@ -200,9 +206,15 @@ function drawOneAnnotation(a) {
   const h = a.height || 0;
 
   if (a.type === 'text') {
-    annotCtx.font = (a.fontSize || 20) + 'px sans-serif';
-    annotCtx.fillStyle = a.color || '#ffeb3b';
-    annotCtx.fillText(a.text || '', x, y + (a.fontSize || 20));
+    const fontSize = a.fontSize || 20;
+    const color = a.color || '#ffeb3b';
+    const lines = (a.text || '').split('\n');
+    const lineHeight = fontSize * 1.2;
+    annotCtx.font = fontSize + 'px sans-serif';
+    annotCtx.fillStyle = color;
+    lines.forEach((line, i) => {
+      annotCtx.fillText(line, x, y + (i + 1) * lineHeight);
+    });
   } else if (a.type === 'arrow') {
     const x2 = a.x2 !== undefined ? a.x2 : a.x + w;
     const y2 = a.y2 !== undefined ? a.y2 : a.y + h;
@@ -247,10 +259,64 @@ function getCanvasPoint(e) {
   };
 }
 
+// Hit-test: distance from point to line segment (squared to avoid sqrt)
+function distToSegmentSq(px, py, x1, y1, x2, y2) {
+  const dx = x2 - x1;
+  const dy = y2 - y1;
+  const lenSq = dx * dx + dy * dy;
+  if (lenSq === 0) return (px - x1) * (px - x1) + (py - y1) * (py - y1);
+  let t = ((px - x1) * dx + (py - y1) * dy) / lenSq;
+  t = Math.max(0, Math.min(1, t));
+  const qx = x1 + t * dx;
+  const qy = y1 + t * dy;
+  return (px - qx) * (px - qx) + (py - qy) * (py - qy);
+}
+
+function hitTestAnnotation(canvasX, canvasY) {
+  const thresholdSq = 64; // ~8px
+  for (let i = annotations.length - 1; i >= 0; i--) {
+    const a = annotations[i];
+    if (a.type === 'text') {
+      if (!annotCtx) continue;
+      const lines = (a.text || '').split('\n');
+      const fontSize = a.fontSize || 20;
+      const lineHeight = fontSize * 1.2;
+      annotCtx.font = fontSize + 'px sans-serif';
+      let maxW = 0;
+      lines.forEach((line) => {
+        const w = annotCtx.measureText(line).width;
+        if (w > maxW) maxW = w;
+      });
+      const top = a.y;
+      const left = a.x;
+      const width = maxW;
+      const height = lines.length * lineHeight;
+      if (canvasX >= left && canvasX <= left + width && canvasY >= top && canvasY <= top + height) return i;
+    } else if (a.type === 'arrow') {
+      const x2 = a.x2 !== undefined ? a.x2 : a.x + (a.width || 0);
+      const y2 = a.y2 !== undefined ? a.y2 : a.y + (a.height || 0);
+      if (distToSegmentSq(canvasX, canvasY, a.x, a.y, x2, y2) <= thresholdSq) return i;
+    } else if (a.type === 'highlight' || a.type === 'blur') {
+      const w = a.width || 0;
+      const h = a.height || 0;
+      if (canvasX >= a.x && canvasX <= a.x + w && canvasY >= a.y && canvasY <= a.y + h) return i;
+    }
+  }
+  return null;
+}
+
 function onCanvasMouseDown(e) {
   const p = getCanvasPoint(e);
   if (currentTool === 'select') {
-    // TODO: select/move existing
+    const idx = hitTestAnnotation(p.x, p.y);
+    if (idx !== null) {
+      selectedAnnotationIndex = idx;
+      selectDragStart = { startX: p.x, startY: p.y, origX: annotations[idx].x, origY: annotations[idx].y };
+      if (annotations[idx].type === 'arrow') {
+        selectDragStart.origX2 = annotations[idx].x2;
+        selectDragStart.origY2 = annotations[idx].y2;
+      }
+    }
     return;
   }
   dragStart = { x: p.x, y: p.y, clientX: p.clientX, clientY: p.clientY };
@@ -259,6 +325,27 @@ function onCanvasMouseDown(e) {
 
 function onCanvasMouseMove(e) {
   const p = getCanvasPoint(e);
+  if (currentTool === 'select' && selectedAnnotationIndex !== null && selectDragStart) {
+    const dx = p.x - selectDragStart.startX;
+    const dy = p.y - selectDragStart.startY;
+    const a = annotations[selectedAnnotationIndex];
+    a.x = selectDragStart.origX + dx;
+    a.y = selectDragStart.origY + dy;
+    if (a.type === 'arrow' && selectDragStart.origX2 !== undefined) {
+      a.x2 = selectDragStart.origX2 + dx;
+      a.y2 = selectDragStart.origY2 + dy;
+    }
+    selectDragStart.startX = p.x;
+    selectDragStart.startY = p.y;
+    selectDragStart.origX = a.x;
+    selectDragStart.origY = a.y;
+    if (a.type === 'arrow') {
+      selectDragStart.origX2 = a.x2;
+      selectDragStart.origY2 = a.y2;
+    }
+    redrawAnnotations();
+    return;
+  }
   if (!dragStart) return;
   if (currentTool === 'arrow') {
     currentAnnotation.x2 = p.x;
@@ -283,6 +370,11 @@ function onCanvasMouseMove(e) {
 }
 
 function onCanvasMouseUp(e) {
+  if (currentTool === 'select') {
+    selectedAnnotationIndex = null;
+    selectDragStart = null;
+    return;
+  }
   if (!dragStart) return;
   const p = getCanvasPoint(e);
   if (currentTool === 'arrow') {
@@ -307,17 +399,59 @@ function onCanvasMouseUp(e) {
       annotations.push(a);
     }
   } else if (currentTool === 'text') {
-    const text = prompt('Enter text:');
-    if (text) {
-      const a = { ...currentAnnotation };
-      a.text = text;
-      a.fontSize = 24;
-      annotations.push(a);
-    }
+    openInlineTextEditor({ ...currentAnnotation }, p.clientX, p.clientY);
   }
   dragStart = null;
   currentAnnotation = null;
   redrawAnnotations();
+}
+
+// Inline text editor (on screenshot at click position, multi-line)
+let pendingTextAnnotation = null;
+
+function openInlineTextEditor(annotation, displayX, displayY) {
+  pendingTextAnnotation = annotation;
+  if (!inlineTextEditor || !textEntryInput) return;
+  const wrap = annotCanvas.parentElement;
+  if (!wrap) return;
+  const fontSize = 24;
+  const scale = wrap.offsetWidth / annotCanvas.width;
+  const displayFontSize = Math.max(12, Math.round(fontSize * scale));
+  inlineTextEditor.style.left = displayX + 'px';
+  inlineTextEditor.style.top = displayY + 'px';
+  inlineTextEditor.style.fontSize = displayFontSize + 'px';
+  textEntryInput.style.fontSize = displayFontSize + 'px';
+  textEntryInput.value = '';
+  inlineTextEditor.classList.remove('hidden');
+  textEntryInput.focus();
+}
+
+function closeInlineTextEditor() {
+  pendingTextAnnotation = null;
+  if (inlineTextEditor) inlineTextEditor.classList.add('hidden');
+}
+
+function commitTextEntry() {
+  const text = textEntryInput && textEntryInput.value ? textEntryInput.value : '';
+  if (pendingTextAnnotation) {
+    if (text.trim()) {
+      const a = { ...pendingTextAnnotation };
+      a.text = text.trimEnd();
+      a.fontSize = 24;
+      annotations.push(a);
+      redrawAnnotations();
+    }
+    closeInlineTextEditor();
+  }
+}
+
+if (textEntryAdd) textEntryAdd.addEventListener('click', () => { commitTextEntry(); });
+if (textEntryCancel) textEntryCancel.addEventListener('click', closeInlineTextEditor);
+if (textEntryInput) {
+  textEntryInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') { e.preventDefault(); closeInlineTextEditor(); }
+    if (e.key === 'Enter' && e.ctrlKey) { e.preventDefault(); commitTextEntry(); }
+  });
 }
 
 // Tool buttons
@@ -326,6 +460,8 @@ toolButtons.forEach((btn) => {
     toolButtons.forEach((b) => b.classList.remove('active'));
     btn.classList.add('active');
     currentTool = btn.dataset.tool;
+    selectedAnnotationIndex = null;
+    selectDragStart = null;
   });
 });
 

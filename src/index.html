@@ -73,6 +73,13 @@
             <div class="canvas-wrap">
               <img id="screenshot-img" alt="Screenshot" />
               <canvas id="annot-canvas"></canvas>
+              <div id="inline-text-editor" class="inline-text-editor hidden" role="dialog" aria-label="Enter text">
+                <textarea id="text-entry-input" rows="3" placeholder="Type your text… (Ctrl+Enter to finish)"></textarea>
+                <div class="inline-text-editor-actions">
+                  <button type="button" id="text-entry-cancel">Cancel</button>
+                  <button type="button" id="text-entry-add">Done</button>
+                </div>
+              </div>
             </div>
           </div>
         </div>
