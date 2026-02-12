@@ -21,51 +21,44 @@ let currentTool = 'select';
 
 // --- Home: capture actions ---
 
+/** Detect which capture dependency is needed from the error message. Returns package key or null. */
+function getRequiredDependency(errorMsg) {
+  if (!errorMsg) return null;
+  const msg = errorMsg.toLowerCase();
+  if (msg.includes('gnome-screenshot') || (msg.includes('gnome') && msg.includes('wayland')) || msg.includes('wlr-screencopy') || (msg.includes('compositor') && msg.includes('support'))) {
+    return 'gnome-screenshot';
+  }
+  if (msg.includes('grim') || msg.includes('grim is required')) {
+    return 'grim';
+  }
+  if (msg.includes('scrot') || msg.includes('scrot is required')) {
+    return 'scrot';
+  }
+  return null;
+}
+
+const DEPENDENCY_LABELS = {
+  'gnome-screenshot': 'gnome-screenshot (for GNOME Wayland)',
+  grim: 'grim (for Wayland)',
+  scrot: 'scrot (for X11)',
+};
+
 async function handleCaptureError(errorMsg) {
   console.error('[Ninja Shot] Capture error:', errorMsg);
-  const isGnomeScreenshotError = errorMsg && (errorMsg.includes('gnome-screenshot') || errorMsg.includes('GNOME'));
-  const isGrimMissingError = errorMsg && errorMsg.includes('Grim is required');
-  const isScrotMissingError = errorMsg && errorMsg.includes('Scrot is required on Linux');
-  if (isGnomeScreenshotError && window.ninjaShot.installGnomeScreenshot) {
+  const packageKey = getRequiredDependency(errorMsg);
+  if (packageKey && window.ninjaShot.installDependency) {
+    const label = DEPENDENCY_LABELS[packageKey] || packageKey;
     const install = confirm(
-      'gnome-screenshot is needed for screen capture on GNOME Wayland. Install it now?\n\nYou may be asked for your password.'
+      'Ninja Shot needs "' + label + '" to capture the screen.\n\n' +
+      'Install it now? You may be asked for your password.'
     );
     if (install) {
-      const result = await window.ninjaShot.installGnomeScreenshot();
+      const result = await window.ninjaShot.installDependency(packageKey);
       if (result && result.ok) {
-        alert('gnome-screenshot was installed. Try capturing again.');
+        console.log('[Ninja Shot] Installed:', packageKey);
+        alert('Installation finished. Try capturing again.');
       } else {
-        alert((result && result.error) || 'Try: sudo apt-get install gnome-screenshot');
-      }
-    }
-  } else if (isGrimMissingError && window.ninjaShot.installGrim) {
-    const install = confirm(
-      'Grim is required for screen capture on Wayland. Install it now?\n\n' +
-      'You may be asked for your password. Click OK to start installation.'
-    );
-    if (install) {
-      const result = await window.ninjaShot.installGrim();
-      if (result && result.ok) {
-        console.log('[Ninja Shot] Grim installed successfully');
-        alert('Grim was installed. Try capturing again.');
-      } else {
-        const err = (result && result.error) || 'Try in a terminal: sudo apt-get install grim';
-        console.error('[Ninja Shot] Install failed:', err);
-        alert(err);
-      }
-    }
-  } else if (isScrotMissingError && window.ninjaShot.installScrot) {
-    const install = confirm(
-      'Scrot is required for screen capture on Linux (X11). Install it now?\n\n' +
-      'You may be asked for your password. Click OK to start installation.'
-    );
-    if (install) {
-      const result = await window.ninjaShot.installScrot();
-      if (result && result.ok) {
-        console.log('[Ninja Shot] Scrot installed successfully');
-        alert('Scrot was installed. Try capturing again.');
-      } else {
-        const err = (result && result.error) || 'Installation failed. Try in a terminal: sudo apt-get install scrot';
+        const err = (result && result.error) || 'Installation failed. Try in a terminal.';
         console.error('[Ninja Shot] Install failed:', err);
         alert(err);
       }

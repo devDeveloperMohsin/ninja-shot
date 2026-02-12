@@ -4,13 +4,12 @@ Screenshot app built with Electron: full-screen or region capture, annotations (
 
 ## Requirements
 
-- **Linux (X11):** Screen capture uses **scrot**. Install with:
-  ```bash
-  sudo apt-get install scrot
-  ```
-- **Linux (Wayland):**
-  - **Sway / wlroots:** Uses **grim**. Install: `sudo apt-get install grim`
-  - **GNOME:** Grim fails with "compositor doesn't support wlr-screencopy". The app falls back to **gnome-screenshot** (usually pre-installed). If needed: `sudo apt-get install gnome-screenshot`
+- **Linux:** Screen capture needs one of these (the app will prompt to install if missing):
+  - **X11:** **scrot** — `sudo apt-get install scrot`
+  - **Wayland (Sway/wlroots):** **grim** — `sudo apt-get install grim`
+  - **Wayland (GNOME):** **gnome-screenshot** — `sudo apt-get install gnome-screenshot` (often pre-installed)
+
+  When you try to capture and a dependency is missing, Ninja Shot will ask: *"Install it now?"* and can install it for you (you may be asked for your password).
 
 ## Usage
 

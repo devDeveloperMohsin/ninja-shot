@@ -18,7 +18,6 @@ contextBridge.exposeInMainWorld('ninjaShot', {
     ipcRenderer.on(channel, fn);
     return () => ipcRenderer.removeAllListeners(channel);
   },
-  installScrot: () => ipcRenderer.invoke('install:scrot'),
-  installGrim: () => ipcRenderer.invoke('install:grim'),
-  installGnomeScreenshot: () => ipcRenderer.invoke('install:gnome-screenshot'),
+  /** Install a capture dependency (Linux). packageKey: 'scrot' | 'grim' | 'gnome-screenshot' */
+  installDependency: (packageKey) => ipcRenderer.invoke('install:dependency', packageKey),
 });

@@ -223,18 +223,26 @@ ipcMain.handle('config:set', (_event, updates) => {
   return { ok: true };
 });
 
-// Linux: try to install scrot via system package manager (pkexec will prompt for password)
-ipcMain.handle('install:scrot', () => {
+// Linux: unified installer for screen-capture dependencies (pkexec will prompt for password)
+const CAPTURE_DEPS = {
+  scrot: { name: 'scrot', cmd: 'scrot', hint: 'sudo apt-get install scrot' },
+  grim: { name: 'grim', cmd: 'grim', hint: 'sudo apt-get install grim' },
+  'gnome-screenshot': { name: 'gnome-screenshot', cmd: 'gnome-screenshot', hint: 'sudo apt-get install gnome-screenshot' },
+};
+
+ipcMain.handle('install:dependency', (_event, packageKey) => {
   if (process.platform !== 'linux') {
     return Promise.resolve({ ok: false, error: 'Only supported on Linux' });
   }
+  const pkg = CAPTURE_DEPS[packageKey];
+  if (!pkg) {
+    return Promise.resolve({ ok: false, error: 'Unknown dependency: ' + packageKey });
+  }
   return new Promise((resolve) => {
     const tryApt = () => {
-      const child = spawn('pkexec', ['apt-get', 'install', '-y', 'scrot'], {
+      const child = spawn('pkexec', ['apt-get', 'install', '-y', pkg.cmd], {
         stdio: ['ignore', 'pipe', 'pipe'],
       });
-      let stderr = '';
-      child.stderr.on('data', (d) => { stderr += d.toString(); });
       child.on('close', (code) => {
         if (code === 0) return resolve({ ok: true });
         tryDnf();
@@ -242,11 +250,9 @@ ipcMain.handle('install:scrot', () => {
       child.on('error', () => tryDnf());
     };
     const tryDnf = () => {
-      const child = spawn('pkexec', ['dnf', 'install', '-y', 'scrot'], {
+      const child = spawn('pkexec', ['dnf', 'install', '-y', pkg.cmd], {
         stdio: ['ignore', 'pipe', 'pipe'],
       });
-      let stderr = '';
-      child.stderr.on('data', (d) => { stderr += d.toString(); });
       child.on('close', (code) => {
         if (code === 0) return resolve({ ok: true });
         tryZypper();
@@ -254,68 +260,14 @@ ipcMain.handle('install:scrot', () => {
       child.on('error', () => tryZypper());
     };
     const tryZypper = () => {
-      const child = spawn('pkexec', ['zypper', 'install', '-y', 'scrot'], {
-        stdio: ['ignore', 'pipe', 'pipe'],
-      });
-      let stderr = '';
-      child.stderr.on('data', (d) => { stderr += d.toString(); });
-      child.on('close', (code) => {
-        if (code === 0) return resolve({ ok: true });
-        resolve({ ok: false, error: 'Could not install scrot. Try: sudo apt-get install scrot' });
-      });
-      child.on('error', () => {
-        resolve({ ok: false, error: 'Could not install scrot. Try: sudo apt-get install scrot' });
-      });
-    };
-    tryApt();
-  });
-});
-
-// Linux Wayland: install grim (screenshot tool for Wayland)
-ipcMain.handle('install:grim', () => {
-  if (process.platform !== 'linux') {
-    return Promise.resolve({ ok: false, error: 'Only supported on Linux' });
-  }
-  return new Promise((resolve) => {
-    const tryApt = () => {
-      const child = spawn('pkexec', ['apt-get', 'install', '-y', 'grim'], {
+      const child = spawn('pkexec', ['zypper', 'install', '-y', pkg.cmd], {
         stdio: ['ignore', 'pipe', 'pipe'],
       });
       child.on('close', (code) => {
         if (code === 0) return resolve({ ok: true });
-        tryDnf();
+        resolve({ ok: false, error: 'Could not install. Try: ' + pkg.hint });
       });
-      child.on('error', () => tryDnf());
-    };
-    const tryDnf = () => {
-      const child = spawn('pkexec', ['dnf', 'install', '-y', 'grim'], {
-        stdio: ['ignore', 'pipe', 'pipe'],
-      });
-      child.on('close', (code) => {
-        if (code === 0) return resolve({ ok: true });
-        resolve({ ok: false, error: 'Could not install grim. Try: sudo apt-get install grim' });
-      });
-      child.on('error', () => resolve({ ok: false, error: 'Try: sudo apt-get install grim' }));
-    };
-    tryApt();
-  });
-});
-
-// Linux GNOME Wayland: install gnome-screenshot (fallback when grim doesn't work)
-ipcMain.handle('install:gnome-screenshot', () => {
-  if (process.platform !== 'linux') {
-    return Promise.resolve({ ok: false, error: 'Only supported on Linux' });
-  }
-  return new Promise((resolve) => {
-    const tryApt = () => {
-      const child = spawn('pkexec', ['apt-get', 'install', '-y', 'gnome-screenshot'], {
-        stdio: ['ignore', 'pipe', 'pipe'],
-      });
-      child.on('close', (code) => {
-        if (code === 0) return resolve({ ok: true });
-        resolve({ ok: false, error: 'Could not install. Try: sudo apt-get install gnome-screenshot' });
-      });
-      child.on('error', () => resolve({ ok: false, error: 'Try: sudo apt-get install gnome-screenshot' }));
+      child.on('error', () => resolve({ ok: false, error: 'Try: ' + pkg.hint }));
     };
     tryApt();
   });
