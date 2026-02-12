@@ -7,6 +7,7 @@
   "private": true,
   "scripts": {
     "start": "electron-forge start",
+    "start:quiet": "electron-forge start 2>&1 | grep -v 'GLib-GObject' || true",
     "package": "electron-forge package",
     "make": "electron-forge make",
     "publish": "electron-forge publish",
@@ -35,6 +36,8 @@
     "style-loader": "^3.3.4"
   },
   "dependencies": {
-    "electron-squirrel-startup": "^1.0.1"
+    "electron-squirrel-startup": "^1.0.1",
+    "screenshot-desktop": "^1.15.3",
+    "sharp": "^0.34.5"
   }
 }

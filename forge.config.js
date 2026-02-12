@@ -44,6 +44,14 @@ module.exports = {
                 js: './src/preload.js',
               },
             },
+            {
+              html: './src/overlay.html',
+              js: './src/overlay.js',
+              name: 'overlay',
+              preload: {
+                js: './src/preload-overlay.js',
+              },
+            },
           ],
         },
       },
