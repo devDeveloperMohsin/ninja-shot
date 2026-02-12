@@ -8,20 +8,36 @@
     <div id="app-container">
       <header id="title-bar">
         <span class="title-bar-drag">Ninja Shot</span>
-        <div class="title-bar-controls">
-          <button type="button" id="btn-window-minimize" title="Minimize">−</button>
-          <button type="button" id="btn-window-maximize" title="Maximize">□</button>
-          <button type="button" id="btn-window-close" title="Close">×</button>
+        <div class="title-bar-right">
+          <button type="button" id="btn-titlebar-settings" class="title-bar-btn-icon" title="Settings" aria-label="Settings">
+            <svg class="title-bar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/><path d="M19.4 15a1.65 1.65 0 0 0 .33-1.82l-.41-.7a1.65 1.65 0 0 0-1.51-.94l-1.04.2a7.2 7.2 0 0 0-.59-.96l.2-1.04a1.65 1.65 0 0 0-1.51-1.51l-.7.41a7.2 7.2 0 0 0-.96-.59l-.2-1.04a1.65 1.65 0 0 0-1.82-.33l-.7.41a1.65 1.65 0 0 0-.94 1.51l.2 1.04a7.2 7.2 0 0 0-.59.96l-1.04-.2a1.65 1.65 0 0 0-1.51 1.51l.41.7a1.65 1.65 0 0 0 .33 1.82l-.41.7a1.65 1.65 0 0 0 .94 1.51l1.04-.2a7.2 7.2 0 0 0 .59.96l-.2 1.04a1.65 1.65 0 0 0 1.51 1.51l.7-.41a7.2 7.2 0 0 0 .96.59l.2 1.04a1.65 1.65 0 0 0 1.82.33l.7-.41a1.65 1.65 0 0 0 .94-1.51l-.2-1.04a7.2 7.2 0 0 0 .59-.96l1.04.2z"/></svg>
+          </button>
+          <div class="title-bar-controls">
+            <button type="button" id="btn-window-minimize" title="Minimize">−</button>
+            <button type="button" id="btn-window-maximize" title="Maximize">□</button>
+            <button type="button" id="btn-window-close" title="Close">×</button>
+          </div>
         </div>
       </header>
       <div id="app-content">
         <div id="view-home" class="view">
           <h1>Ninja Shot</h1>
           <p>Capture your screen, then annotate.</p>
-          <div class="actions">
-            <button type="button" id="btn-full">Full screen</button>
-            <button type="button" id="btn-region">Select region</button>
-            <button type="button" id="btn-settings">Settings</button>
+          <div class="actions-primary">
+            <button type="button" id="btn-full" class="action-btn-primary">
+              <svg class="action-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/></svg>
+              <span>Full screen</span>
+            </button>
+            <button type="button" id="btn-region" class="action-btn-primary">
+              <svg class="action-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17V1H5v4H1v2h4v10c0 1.1.9 2 2 2h10v4h2v-4h4v-2H7z"/><path d="M23 5v2h-4v4h-2V7h-4V5h10z"/></svg>
+              <span>Select region</span>
+            </button>
+          </div>
+          <div class="actions-secondary">
+            <button type="button" id="btn-settings" class="action-btn-secondary" title="Settings">
+              <svg class="action-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/><path d="M19.4 15a1.65 1.65 0 0 0 .33-1.82l-.41-.7a1.65 1.65 0 0 0-1.51-.94l-1.04.2a7.2 7.2 0 0 0-.59-.96l.2-1.04a1.65 1.65 0 0 0-1.51-1.51l-.7.41a7.2 7.2 0 0 0-.96-.59l-.2-1.04a1.65 1.65 0 0 0-1.82-.33l-.7.41a1.65 1.65 0 0 0-.94 1.51l.2 1.04a7.2 7.2 0 0 0-.59.96l-1.04-.2a1.65 1.65 0 0 0-1.51 1.51l.41.7a1.65 1.65 0 0 0 .33 1.82l-.41.7a1.65 1.65 0 0 0 .94 1.51l1.04-.2a7.2 7.2 0 0 0 .59.96l-.2 1.04a1.65 1.65 0 0 0 1.51 1.51l.7-.41a7.2 7.2 0 0 0 .96.59l.2 1.04a1.65 1.65 0 0 0 1.82.33l.7-.41a1.65 1.65 0 0 0 .94-1.51l-.2-1.04a7.2 7.2 0 0 0 .59-.96l1.04.2z"/></svg>
+              <span>Settings</span>
+            </button>
           </div>
         </div>
         <div id="view-settings" class="view hidden">

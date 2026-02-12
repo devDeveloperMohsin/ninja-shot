@@ -19,6 +19,7 @@ function createWindow() {
     minWidth: 400,
     minHeight: 300,
     frame: false,
+    autoHideMenuBar: true,
     backgroundColor: '#1a1a2e',
     webPreferences: {
       preload: MAIN_WINDOW_PRELOAD_WEBPACK_ENTRY,
@@ -27,6 +28,10 @@ function createWindow() {
   });
 
   mainWindow.loadURL(MAIN_WINDOW_WEBPACK_ENTRY);
+
+  mainWindow.webContents.once('did-finish-load', () => {
+    if (mainWindow && !mainWindow.isDestroyed()) mainWindow.setMenuBarVisibility(false);
+  });
 
   if (process.env.NODE_ENV === 'development' || process.argv.includes('--dev')) {
     mainWindow.webContents.openDevTools();
@@ -325,6 +330,9 @@ app.whenReady().then(() => {
   }
   try {
     globalShortcut.register('PrintScreen', onPrintScreen);
+  } catch (_) {}
+  try {
+    globalShortcut.register('CommandOrControl+Q', () => app.quit());
   } catch (_) {}
 
   app.on('activate', () => {

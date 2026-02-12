@@ -16,6 +16,7 @@ Screenshot app built with Electron: full-screen or region capture, annotations (
 - **Full screen** / **Select region**: Capture from the home screen.
 - **Print Screen**: Global shortcut (configurable in Settings: full screen or region).
 - **Editor**: After capture, add text, arrows, highlights, or blur; then **Copy** or **Save**.
+- The app uses a **frameless** window with a custom title bar (drag to move; buttons to minimize, maximize, close). **Quit**: `Ctrl+Q` (Windows/Linux) or `Cmd+Q` (macOS).
 
 ## Where screenshots are saved
 

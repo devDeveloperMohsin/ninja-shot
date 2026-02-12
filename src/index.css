@@ -40,10 +40,40 @@ body {
   color: #e0e0e0;
 }
 
-.title-bar-controls {
+.title-bar-right {
   display: flex;
+  align-items: center;
+  gap: 0.25rem;
   -webkit-app-region: no-drag;
   app-region: no-drag;
+}
+
+.title-bar-btn-icon {
+  width: 34px;
+  height: 38px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: #aaa;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.15s, background 0.15s;
+}
+
+.title-bar-btn-icon:hover {
+  color: #eee;
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.title-bar-icon {
+  width: 18px;
+  height: 18px;
+}
+
+.title-bar-controls {
+  display: flex;
 }
 
 .title-bar-controls button {
@@ -112,36 +142,78 @@ body.editor-active #app-content #view-editor.view-active {
 
 #view-home p {
   color: #9ca3af;
-  margin-bottom: 0.5rem;
+  margin-bottom: 1.5rem;
   font-size: 0.95rem;
 }
 
-.actions {
+.actions-primary {
   display: flex;
-  gap: 0.625rem;
+  gap: 1rem;
   flex-wrap: wrap;
   justify-content: center;
+  margin-bottom: 2rem;
 }
 
-.actions button {
-  padding: 0.625rem 1.25rem;
-  font-size: 0.9375rem;
+.action-btn-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.625rem;
+  padding: 0.875rem 1.5rem;
+  font-size: 1rem;
   font-weight: 500;
-  border: none;
-  border-radius: 10px;
+  border: 1px solid #334155;
+  border-radius: 12px;
   background: #1e293b;
   color: #e8e8e8;
   cursor: pointer;
-  transition: background 0.2s, transform 0.1s;
+  transition: background 0.2s, border-color 0.2s, transform 0.1s;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
 }
 
-.actions button:hover {
+.action-btn-primary:hover {
   background: #334155;
+  border-color: #475569;
 }
 
-.actions button:active {
-  background: #e94560;
+.action-btn-primary:active {
   transform: scale(0.98);
+}
+
+.action-btn-primary .action-icon {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+}
+
+.actions-secondary {
+  display: flex;
+  justify-content: center;
+}
+
+.action-btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: #94a3b8;
+  cursor: pointer;
+  transition: color 0.2s, background 0.2s;
+}
+
+.action-btn-secondary:hover {
+  color: #e2e8f0;
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.action-btn-secondary .action-icon {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
 }
 
 /* Editor */

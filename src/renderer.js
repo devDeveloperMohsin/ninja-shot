@@ -18,6 +18,7 @@ const toolButtons = document.querySelectorAll('.tool');
 const btnWindowMinimize = document.getElementById('btn-window-minimize');
 const btnWindowMaximize = document.getElementById('btn-window-maximize');
 const btnWindowClose = document.getElementById('btn-window-close');
+const btnTitlebarSettings = document.getElementById('btn-titlebar-settings');
 const titleBarDrag = document.querySelector('.title-bar-drag');
 
 let currentImageDataUrl = null;
@@ -30,6 +31,18 @@ if (btnWindowClose) btnWindowClose.addEventListener('click', () => window.ninjaS
 if (titleBarDrag) {
   titleBarDrag.addEventListener('dblclick', () => window.ninjaShot.windowToggleMaximize());
 }
+
+async function openSettingsView() {
+  viewHome.classList.add('hidden');
+  viewEditor.classList.add('hidden');
+  viewSettings.classList.remove('hidden');
+  const config = await window.ninjaShot.getConfig();
+  if (config && config.shortcutAction) settingShortcut.value = config.shortcutAction;
+  const pathRes = await window.ninjaShot.getDefaultScreenshotsPath();
+  if (pathRes && pathRes.path) settingSavePath.textContent = pathRes.path;
+  else settingSavePath.textContent = '';
+}
+if (btnTitlebarSettings) btnTitlebarSettings.addEventListener('click', openSettingsView);
 
 // --- Home: capture actions ---
 
@@ -136,16 +149,7 @@ function showHome() {
 btnNew.addEventListener('click', showHome);
 
 // Settings view
-btnSettings.addEventListener('click', async () => {
-  viewHome.classList.add('hidden');
-  viewEditor.classList.add('hidden');
-  viewSettings.classList.remove('hidden');
-  const config = await window.ninjaShot.getConfig();
-  if (config && config.shortcutAction) settingShortcut.value = config.shortcutAction;
-  const pathRes = await window.ninjaShot.getDefaultScreenshotsPath();
-  if (pathRes && pathRes.path) settingSavePath.textContent = pathRes.path;
-  else settingSavePath.textContent = '';
-});
+btnSettings.addEventListener('click', openSettingsView);
 
 btnSettingsBack.addEventListener('click', () => {
   viewSettings.classList.add('hidden');
@@ -160,7 +164,7 @@ settingShortcut.addEventListener('change', async () => {
 window.ninjaShot.onMenu('menu:new', showHome);
 window.ninjaShot.onMenu('menu:save', () => btnSave.click());
 window.ninjaShot.onMenu('menu:copy', () => btnCopy.click());
-window.ninjaShot.onMenu('menu:settings', () => btnSettings.click());
+window.ninjaShot.onMenu('menu:settings', openSettingsView);
 window.ninjaShot.onMenu('menu:captureFull', () => btnFull.click());
 window.ninjaShot.onMenu('menu:captureRegion', () => btnRegion.click());
 
