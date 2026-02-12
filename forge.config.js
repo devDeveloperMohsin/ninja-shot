@@ -3,7 +3,9 @@ const { FuseV1Options, FuseVersion } = require('@electron/fuses');
 
 module.exports = {
   packagerConfig: {
-    asar: true,
+    asar: {
+      unpack: '**/node_modules/sharp/**',
+    },
   },
   rebuildConfig: {},
   makers: [
@@ -17,11 +19,15 @@ module.exports = {
     },
     {
       name: '@electron-forge/maker-deb',
-      config: {},
-    },
-    {
-      name: '@electron-forge/maker-rpm',
-      config: {},
+      config: {
+        options: {
+          productName: 'Ninja Shot',
+          genericName: 'Screenshot Tool',
+          description: 'Screenshot app: full-screen or region capture, annotate, copy, save.',
+          section: 'graphics',
+          categories: ['Graphics', 'Utility'],
+        },
+      },
     },
   ],
   plugins: [

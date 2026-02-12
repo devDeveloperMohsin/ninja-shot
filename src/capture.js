@@ -1,5 +1,4 @@
 const screenshot = require('screenshot-desktop');
-const sharp = require('sharp');
 const fs = require('fs');
 const os = require('os');
 const path = require('path');
@@ -220,6 +219,59 @@ function captureRegionGrim(bounds) {
 }
 
 /**
+ * Crop a PNG buffer to the given rectangle. Uses sharp if available, otherwise pngjs (pure JS, no Jimp bitmap.data type issues).
+ * @param {Buffer} fullPng - Full PNG buffer.
+ * @param {{ x: number, y: number, width: number, height: number }} bounds - Region to extract.
+ * @returns {Promise<Buffer>} PNG buffer of cropped region.
+ */
+async function cropPngBuffer(fullPng, bounds) {
+  const buf = Buffer.isBuffer(fullPng) ? fullPng : Buffer.from(fullPng);
+  const { x, y, width, height } = bounds;
+  const left = Math.round(x);
+  const top = Math.round(y);
+  const w = Math.round(width);
+  const h = Math.round(height);
+
+  try {
+    const sharp = require('sharp');
+    return sharp(buf)
+      .extract({ left, top, width: w, height: h })
+      .png()
+      .toBuffer();
+  } catch (_) {
+    const PNG = require('pngjs').PNG;
+    const parsed = PNG.sync.read(buf);
+    const fullW = parsed.width;
+    const fullH = parsed.height;
+    const clampLeft = Math.max(0, Math.min(left, fullW - 1));
+    const clampTop = Math.max(0, Math.min(top, fullH - 1));
+    const clampW = Math.min(w, fullW - clampLeft);
+    const clampH = Math.min(h, fullH - clampTop);
+    if (clampW <= 0 || clampH <= 0) {
+      return buf;
+    }
+    const croppedData = Buffer.alloc(clampW * clampH * 4);
+    const src = parsed.data;
+    for (let row = 0; row < clampH; row++) {
+      for (let col = 0; col < clampW; col++) {
+        const srcIdx = ((clampTop + row) * fullW + (clampLeft + col)) << 2;
+        const dstIdx = (row * clampW + col) << 2;
+        croppedData[dstIdx] = src[srcIdx];
+        croppedData[dstIdx + 1] = src[srcIdx + 1];
+        croppedData[dstIdx + 2] = src[srcIdx + 2];
+        croppedData[dstIdx + 3] = src[srcIdx + 3];
+      }
+    }
+    return PNG.sync.write({
+      width: clampW,
+      height: clampH,
+      data: croppedData,
+      gamma: parsed.gamma,
+    });
+  }
+}
+
+/**
  * Capture a region of the screen by capturing full screen then cropping.
  * On Wayland with grim (wlroots): uses grim -g for direct region capture.
  * On GNOME Wayland (grim unsupported): full screen + crop using gnome-screenshot.
@@ -234,21 +286,13 @@ async function captureRegion(bounds, screenIndex) {
     } catch (err) {
       if (isGrimUnsupportedError(err)) {
         const full = await captureFullScreen(screenIndex);
-        const { x, y, width, height } = bounds;
-        return sharp(full)
-          .extract({ left: Math.round(x), top: Math.round(y), width: Math.round(width), height: Math.round(height) })
-          .png()
-          .toBuffer();
+        return cropPngBuffer(full, bounds);
       }
       throw err;
     }
   }
   const full = await captureFullScreen(screenIndex);
-  const { x, y, width, height } = bounds;
-  return sharp(full)
-    .extract({ left: Math.round(x), top: Math.round(y), width: Math.round(width), height: Math.round(height) })
-    .png()
-    .toBuffer();
+  return cropPngBuffer(full, bounds);
 }
 
 /**

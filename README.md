@@ -40,3 +40,17 @@ npm start
 ```bash
 npm run make
 ```
+
+Built installers appear under `out/make/` (e.g. `.deb` on Linux, Squirrel on Windows, `.zip` on macOS).
+
+### Install the .deb on Ubuntu/Debian
+
+Ubuntu Software may show “File not supported” for local `.deb` files. Install from the terminal instead:
+
+```bash
+# Find the .deb (e.g. under out/make/ or out/make/deb/<arch>/)
+sudo dpkg -i path/to/ninja-shot_*_amd64.deb   # use arm64 on ARM machines
+sudo apt-get install -f   # fix any missing dependencies
+```
+
+Then run **Ninja Shot** from your app menu or with `ninja-shot`.
