@@ -15,8 +15,8 @@ let overlayWindow = null;
 function createWindow() {
   const isLinux = process.platform === 'linux';
   mainWindow = new BrowserWindow({
-    width: 900,
-    height: 700,
+    width: 400,
+    height: 300,
     minWidth: 400,
     minHeight: 300,
     frame: false,
@@ -128,6 +128,11 @@ ipcMain.handle('overlay:show', () => {
 // IPC: overlay committed selection (bounds) -> capture region and send to main window
 ipcMain.handle('overlay:commit', async (_event, bounds) => {
   try {
+    // Hide overlay before capture so the selection border is not included in the screenshot
+    if (overlayWindow && !overlayWindow.isDestroyed()) {
+      overlayWindow.hide();
+      await new Promise((r) => setTimeout(r, 50));
+    }
     const buffer = await captureRegion(bounds);
     const data = buffer.toString('base64');
     closeOverlay();
